@@ -183,7 +183,7 @@ def compute_scales(vol, mip, shape, axis, factor, chunk_size=None):
   scales = [ vol.resolution ]
   for factor3 in factors:
     scales.append(
-      list(map(int, Vec(*scales[-1], dtype=np.float32) * Vec(*factor3)))
+      list(map(float, Vec(*scales[-1], dtype=np.float32) * Vec(*factor3)))
     )
   return scales[1:]
 
@@ -200,7 +200,7 @@ def create_downsample_scales(
     print("WARNING: No scales generated.")
 
   for scale in scales:
-    scale = scale // vol.meta.resolution(0)
+    scale = scale / vol.meta.resolution(0)
     vol.add_scale(scale, encoding=encoding, chunk_size=chunk_size)
 
   if chunk_size is None:
