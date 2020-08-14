@@ -474,8 +474,8 @@ def create_skeletonizing_tasks(
     if 'spatial_index' not in vol.skeleton.meta.info or not vol.skeleton.meta.info['spatial_index']:
       vol.skeleton.meta.info['spatial_index'] = {}
     vol.skeleton.meta.info['@type'] = 'neuroglancer_skeletons'
-    vol.skeleton.meta.info['spatial_index']['chunk_size'] = tuple(shape * vol.resolution)
-  
+    vol.skeleton.meta.info['spatial_index']['chunk_size'] = tuple(shape)
+
   vol.skeleton.meta.info['mip'] = int(mip)
   if sharded:
     vol.skeleton.meta.info['vertex_attributes'] = vol.skeleton.meta.info['vertex_attributes'][:1]
@@ -632,10 +632,10 @@ def create_sharded_skeleton_merge_tasks(
   cv.skeleton.meta.info['sharding'] = spec.to_dict()
   cv.skeleton.meta.commit_info()
 
-  cv = CloudVolume(layer_path) # rebuild b/c sharding changes the skeleton object
+  cv = CloudVolume(layer_path, cv.skeleton.meta.mip) # rebuild b/c sharding changes the skeleton object
 
   # 17 sec to download for pinky100
-  all_labels = cv.skeleton.spatial_index.query(cv.bounds * cv.resolution)
+  all_labels = cv.skeleton.spatial_index.query(cv.bounds)
   # perf: ~36k hashes/sec
   shardfn = lambda lbl: cv.skeleton.reader.spec.compute_shard_location(lbl).shard_number
 

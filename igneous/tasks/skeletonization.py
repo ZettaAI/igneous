@@ -173,7 +173,6 @@ class SkeletonTask(RegisteredTask):
       segid_bbx = Bbox.from_points( skel.vertices )
       spatial_index[segid] = segid_bbx.to_list()
 
-    bbox = bbox * vol.resolution
     with SimpleStorage(path, progress=vol.progress) as stor:
       stor.put_file(
         file_path="{}.spatial".format(bbox.to_filename()),
@@ -377,7 +376,6 @@ class ShardedSkeletonMergeTask(RegisteredTask):
     for label, locations in index_filenames.items():
       for i, location in enumerate(locations):
         bbx = Bbox.from_filename(re.sub(SPATIAL_EXT, '', location))
-        bbx /= cv.meta.resolution(cv.skeleton.meta.mip)
         index_filenames[label][i] = bbx.to_filename() + '.frags'
     return index_filenames
 
@@ -390,7 +388,7 @@ class ShardedSkeletonMergeTask(RegisteredTask):
     if labels is not None:
       return labels
 
-    labels = cv.skeleton.spatial_index.query(cv.bounds * cv.resolution)
+    labels = cv.skeleton.spatial_index.query(cv.bounds)
     spec = cv.skeleton.reader.spec
 
     return [ 
