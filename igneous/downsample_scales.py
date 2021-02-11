@@ -190,9 +190,9 @@ def compute_scales(vol, mip, shape, axis, factor, chunk_size=None):
 def create_downsample_scales(
     layer_path, mip, ds_shape, axis='z', 
     preserve_chunk_size=False, chunk_size=None,
-    encoding=None, factor=None
+    encoding=None, factor=None, request_payer=None
   ):
-  vol = CloudVolume(layer_path, mip)
+  vol = CloudVolume(layer_path, mip, request_payer=request_payer)
 
   scales = compute_scales(vol, mip, ds_shape, axis, factor, chunk_size)
 

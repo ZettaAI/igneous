@@ -81,7 +81,11 @@ def downsample_and_upload(
       vol.mip += 1
       if max_mip is not None and vol.mip > max_mip:
         break
-      vol.config.storage_class = mip_to_storage_class.get(vol.mip)
+      # vol.config.storage_class = mip_to_storage_class.get(vol.mip)
+      if vol.mip > 2:
+        vol.config.storage_class = 'STANDARD'
+      else:
+        vol.config.storage_class = 'COLDLINE'
       new_bounds //= factor3
       mipped = mips.pop(0)
       new_bounds.maxpt = new_bounds.minpt + Vec(*mipped.shape[:3])
@@ -707,7 +711,8 @@ def TransferTask(
   factor=None,
   skip_ds_mips=[],
   mip_to_storage_class={},
-  max_mip=None
+  max_mip=None,
+  request_payer=None
 ):
   shape = Vec(*shape)
   offset = Vec(*offset)
@@ -727,7 +732,7 @@ def TransferTask(
     dest_path, fill_missing=fill_missing,
     mip=mip, delete_black_uploads=delete_black_uploads,
     background_color=background_color, compress=compress,
-    storage_class=storage_class
+    storage_class=storage_class, request_payer=request_payer
   )
 
   dst_bounds = Bbox(offset, shape + offset)

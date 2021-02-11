@@ -902,7 +902,8 @@ def create_transfer_tasks(
     delete_black_uploads=False, background_color=0,
     agglomerate=False, timestamp=None, compress='gzip',
     factor=None, skip_first=False, skip_ds_mips=[],
-    mip_to_storage_class={}, max_mip=None
+    mip_to_storage_class={}, max_mip=None,
+    request_payer=None
   ):
   """
   Transfer data from one data layer to another. It's possible
@@ -919,10 +920,10 @@ def create_transfer_tasks(
   chunk_size = Vec(*chunk_size)
 
   try:
-    dvol = CloudVolume(dest_layer_path, mip=mip)
+    dvol = CloudVolume(dest_layer_path, mip=mip, request_payer=request_payer)
   except Exception: # no info file
     info = copy.deepcopy(vol.info)
-    dvol = CloudVolume(dest_layer_path, info=info)
+    dvol = CloudVolume(dest_layer_path, info=info, request_payer=request_payer)
     # dvol.commit_info()
 
   if encoding is not None:
@@ -937,7 +938,7 @@ def create_transfer_tasks(
     downsample_scales.create_downsample_scales(dest_layer_path, 
       mip=mip, ds_shape=shape, 
       preserve_chunk_size=preserve_chunk_size,
-      encoding=encoding
+      encoding=encoding, request_payer=request_payer
     )
 
   if bounds is None:
@@ -973,7 +974,8 @@ def create_transfer_tasks(
         skip_first=skip_first,
         skip_ds_mips=skip_ds_mips,
         mip_to_storage_class=mip_to_storage_class,
-        max_mip=max_mip
+        max_mip=max_mip,
+        request_payer=request_payer
       )
 
     def on_finish(self):
@@ -1002,7 +1004,7 @@ def create_transfer_tasks(
         'date': strftime('%Y-%m-%d %H:%M %Z'),
       }
 
-      dvol = CloudVolume(dest_layer_path)
+      dvol = CloudVolume(dest_layer_path, request_payer=request_payer)
       dvol.provenance.sources = [ src_layer_path ]
       dvol.provenance.processing.append(job_details) 
       dvol.commit_provenance()
